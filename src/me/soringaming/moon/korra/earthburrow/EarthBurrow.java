@@ -1,11 +1,8 @@
 package me.soringaming.moon.korra.earthburrow;
 
 import java.util.ArrayList;
-<<<<<<< HEAD
-import java.util.logging.Level;
-=======
 import java.util.concurrent.ConcurrentHashMap;
->>>>>>> origin/master
+import java.util.logging.Level;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,39 +10,27 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.util.Vector;
 
-<<<<<<< HEAD
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ProjectKorra;
 import com.projectkorra.projectkorra.ability.ComboAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.util.ClickType;
-
-public class EarthBurrow extends EarthAbility implements ComboAbility {
-=======
-import com.projectkorra.projectkorra.GeneralMethods;
-import com.projectkorra.projectkorra.ability.ComboAbility;
-import com.projectkorra.projectkorra.ability.EarthAbility;
-import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.util.TempBlock;
 
 public class EarthBurrow extends EarthAbility implements ComboAbility {
 
 	private static final ConcurrentHashMap<Block, Long> getTopBlock = new ConcurrentHashMap<Block, Long>();
->>>>>>> origin/master
 
 	private Player player;
 	private Location loc;
 	private Permission perm;
 	private Location start;
-
-<<<<<<< HEAD
-=======
 	private boolean StoredTopBlock;
 
 	private int depth;
-
->>>>>>> origin/master
 	public EarthBurrow(Player player) {
 		super(player);
 		this.player = player;
@@ -93,9 +78,6 @@ public class EarthBurrow extends EarthAbility implements ComboAbility {
 
 	@Override
 	public void progress() {
-<<<<<<< HEAD
-
-=======
 		if (!GeneralMethods.isSolid(player.getLocation().add(new Vector(0, -1, 0)).getBlock())) {
 			remove();
 			return;
@@ -131,7 +113,6 @@ public class EarthBurrow extends EarthAbility implements ComboAbility {
 				getTopBlock.remove(block);
 			}
 		}
->>>>>>> origin/master
 	}
 
 	@Override
