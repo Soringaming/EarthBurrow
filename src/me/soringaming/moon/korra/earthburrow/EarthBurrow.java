@@ -1,28 +1,33 @@
 package me.soringaming.moon.korra.earthburrow;
 
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.util.Vector;
 
+import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ProjectKorra;
 import com.projectkorra.projectkorra.ability.AddonAbility;
-import com.projectkorra.projectkorra.ability.ComboAbility;
-import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
-import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
-import com.projectkorra.projectkorra.util.ClickType;
 
-public class EarthBurrow extends EarthAbility implements AddonAbility, ComboAbility {
+public class EarthBurrow extends EarthAbility implements AddonAbility {
 
 	private Permission perm;
 
+	private Player player;
+
+	private boolean topBlockStored;
+	
+	private static final ConcurrentHashMap<Block, Long> TopBlockRevert = new ConcurrentHashMap<Block, Long>();
+
 	public EarthBurrow(Player player) {
 		super(player);
+		this.player = player;
 	}
 
 	@Override
@@ -56,31 +61,32 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, ComboAbil
 			remove();
 			return;
 		}
-		if (!bPlayer.canBend(CoreAbility.getAbility("EarthBurrow"))) {
-			remove();
-			return;
+		
+		if(!GeneralMethods.isSolid(player.getLocation().add(new Vector(0, -1, 0)).getBlock())) {
+			Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
+			if(!isEarthbendable(block)) {
+				remove();
+				return;
+			} else {
+				player.teleport(block.getLocation());
+				sinkPlayer();
+			}
+			
+		}
+			
+	}
+	
+	public void sinkPlayer() {
+		if(!topBlockStored) {
+			Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
+			player.setVelocity(new Vector(0, -5, 0));
 		}
 	}
-
-	@Override
-	public Object createNewComboInstance(Player arg0) {
-		return new EarthBurrow(player);
+	
+	public static void revert(boolean doRevert) {
+		
 	}
-
-	@Override
-	public ArrayList<AbilityInformation> getCombination() {
-		ArrayList<AbilityInformation> EarthBurrow = new ArrayList<AbilityInformation>();
-		EarthBurrow.add(new AbilityInformation("Collapse", ClickType.RIGHT_CLICK));
-		EarthBurrow.add(new AbilityInformation("EarthTunnel", ClickType.LEFT_CLICK));
-		EarthBurrow.add(new AbilityInformation("EarthTunnel", ClickType.LEFT_CLICK));
-		return EarthBurrow;
-	}
-
-	@Override
-	public String getInstructions() {
-		return "Collapse (Right-Click) > EarthTunnel (Left-Click) > EarthTunnel (Left-Click)";
-	}
-
+	
 	@Override
 	public String getAuthor() {
 		return "Soringaming & Moon243";
