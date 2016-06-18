@@ -4,6 +4,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
@@ -14,6 +16,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ProjectKorra;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
+import com.projectkorra.projectkorra.util.TempBlock;
 
 public class EarthBurrow extends EarthAbility implements AddonAbility {
 
@@ -22,8 +25,10 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 	private Player player;
 
 	private boolean topBlockStored;
+
+	private int depth;
 	
-	private static final ConcurrentHashMap<Block, Long> TopBlockRevert = new ConcurrentHashMap<Block, Long>();
+	private static final ConcurrentHashMap<Block, Long> TopBlock = new ConcurrentHashMap<Block, Long>();
 
 	public EarthBurrow(Player player) {
 		super(player);
@@ -57,6 +62,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 
 	@Override
 	public void progress() {
+		revert(false);
 		if (player.isDead() || !player.isOnline()) {
 			remove();
 			return;
@@ -77,14 +83,31 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 	}
 	
 	public void sinkPlayer() {
+		Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
 		if(!topBlockStored) {
-			Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
 			player.setVelocity(new Vector(0, -5, 0));
+			new TempBlock(block, Material.AIR, (byte) 0);
+			player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
+			TopBlock.put(block, 1000L);
+			topBlockStored = true;
+			depth++;
+		} else {
+			if(depth <= 3) {
+				depth++;
+				block.setType(Material.AIR);
+				player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
+			}
 		}
 	}
 	
 	public static void revert(boolean doRevert) {
-		
+		for(Block b : TopBlock.keySet()) {
+			long time = TopBlock.get(b);
+			if(System.currentTimeMillis() >= time || doRevert) {
+				TempBlock.revertBlock(b, Material.AIR);
+				TopBlock.remove(b);
+			}
+		}
 	}
 	
 	@Override
