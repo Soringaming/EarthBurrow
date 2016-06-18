@@ -122,7 +122,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 
 	@Override
 	public void load() {
-		ProjectKorra.plugin.getServer().getLogger().log(Level.INFO,
+		ProjectKorra.plugin.getLogger().log(Level.INFO,
 				getName() + " " + getVersion() + " Developed By " + getAuthor() + " Has Been Enabled");
 		perm = new Permission("bending.ability.EarthBurrow");
 		perm.setDefault(PermissionDefault.TRUE);
@@ -131,7 +131,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 
 	@Override
 	public void stop() {
-		ProjectKorra.plugin.getServer().getLogger().log(Level.INFO,
+		ProjectKorra.plugin.getLogger().log(Level.INFO,
 				getName() + " " + getVersion() + " Developed By " + getAuthor() + " Has Been Disabled");
 		ProjectKorra.plugin.getServer().getPluginManager().removePermission(perm);
 		super.remove();
