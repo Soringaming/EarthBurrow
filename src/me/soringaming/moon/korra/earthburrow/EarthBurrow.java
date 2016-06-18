@@ -86,7 +86,7 @@ public class EarthBurrow extends EarthAbility implements ComboAbility {
 			remove();
 			return;
 		}
-
+		
 	}
 
 	public void doBlockRemove() {
