@@ -16,6 +16,7 @@ import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ProjectKorra;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ComboAbility;
+import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.util.ClickType;
@@ -25,7 +26,6 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, ComboAbil
 
 	private static final ConcurrentHashMap<Block, Long> getTopBlock = new ConcurrentHashMap<Block, Long>();
 
-	private Player p;
 	private Location loc;
 	private Permission perm;
 	private boolean StoredTopBlock;
@@ -34,8 +34,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, ComboAbil
 
 	public EarthBurrow(Player player) {
 		super(player);
-		this.p = player;
-		this.loc = p.getLocation();
+		this.loc = player.getLocation();
 		start();
 	}
 
@@ -78,6 +77,10 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, ComboAbil
 			remove();
 			return;
 		}
+		if (!bPlayer.canBendIgnoreBinds(CoreAbility.getAbility("EarthBurrow")) || !bPlayer.canBend(EarthBurrow.getAbility((String) "Collapse"))) {
+            this.remove();
+            return;
+        }
 		doBlockRemove();
 
 	}
@@ -113,7 +116,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, ComboAbil
 
 	@Override
 	public Object createNewComboInstance(Player player) {
-		return new EarthBurrow(p);
+		return new EarthBurrow(player);
 	}
 
 	@Override
