@@ -27,7 +27,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 	private boolean topBlockStored;
 
 	private int depth;
-	
+
 	private static final ConcurrentHashMap<Block, Long> TopBlock = new ConcurrentHashMap<Block, Long>();
 
 	public EarthBurrow(Player player) {
@@ -42,7 +42,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 
 	@Override
 	public Location getLocation() {
-		return null;
+		return player.getLocation();
 	}
 
 	@Override
@@ -67,24 +67,24 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 			remove();
 			return;
 		}
-		
-		if(!GeneralMethods.isSolid(player.getLocation().add(new Vector(0, -1, 0)).getBlock())) {
+
+		if (!GeneralMethods.isSolid(player.getLocation().add(new Vector(0, -1, 0)).getBlock())) {
 			Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
-			if(!isEarthbendable(block)) {
+			if (!isEarthbendable(block)) {
 				remove();
 				return;
 			} else {
 				player.teleport(block.getLocation());
 				sinkPlayer();
 			}
-			
+
 		}
-			
+
 	}
-	
+
 	public void sinkPlayer() {
 		Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
-		if(!topBlockStored) {
+		if (!topBlockStored) {
 			player.setVelocity(new Vector(0, -5, 0));
 			new TempBlock(block, Material.AIR, (byte) 0);
 			player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
@@ -92,24 +92,29 @@ public class EarthBurrow extends EarthAbility implements AddonAbility {
 			topBlockStored = true;
 			depth++;
 		} else {
-			if(depth <= 3) {
+			if (depth <= 3) {
 				depth++;
 				block.setType(Material.AIR);
 				player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
 			}
 		}
 	}
-	
+
 	public static void revert(boolean doRevert) {
-		for(Block b : TopBlock.keySet()) {
+		for (Block b : TopBlock.keySet()) {
 			long time = TopBlock.get(b);
-			if(System.currentTimeMillis() >= time || doRevert) {
+			if (System.currentTimeMillis() >= time || doRevert) {
 				TempBlock.revertBlock(b, Material.AIR);
 				TopBlock.remove(b);
 			}
 		}
 	}
-	
+
+	@Override
+	public String getDescription() {
+		return getName() + " " + getVersion() + " Developed By: \nA Test Ability ";
+	}
+
 	@Override
 	public String getAuthor() {
 		return "Soringaming & Moon243";
