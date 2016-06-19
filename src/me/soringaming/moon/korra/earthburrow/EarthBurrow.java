@@ -198,7 +198,11 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, Listener 
 
 	@Override
 	public String getDescription() {
+<<<<<<< HEAD
 		return getName() + " " + getVersion() + " Developed By " + getAuthor() + ":\nA Test Ability ";
+=======
+		return  getVersion() + " Developed By:" + getAuthor() + "\nA Test Ability ";
+>>>>>>> origin/master
 	}
 
 	@Override
