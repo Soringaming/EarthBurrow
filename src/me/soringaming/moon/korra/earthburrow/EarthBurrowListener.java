@@ -13,7 +13,9 @@ public class EarthBurrowListener implements Listener {
 	@EventHandler
 	public void onShift(PlayerToggleSneakEvent e) {
 		if (canBend(e.getPlayer())) {
-			new EarthBurrow(e.getPlayer());
+			if(e.getPlayer().isSneaking()) {
+				new EarthBurrow(e.getPlayer());
+			}
 		}
 	}
 		private boolean canBend(Player p) {
