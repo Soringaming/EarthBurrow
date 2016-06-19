@@ -9,24 +9,22 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 
 public class EarthBurrowListener implements Listener {
-	
+
 	@EventHandler
 	public void onShift(PlayerToggleSneakEvent e) {
 		if (canBend(e.getPlayer())) {
-			if(e.getPlayer().isSneaking()) {
-				new EarthBurrow(e.getPlayer());
-			}
+			new EarthBurrow(e.getPlayer());
 		}
 	}
-		private boolean canBend(Player p) {
-			BendingPlayer bp = BendingPlayer.getBendingPlayer(p.getPlayer());
-			
-			if (bp.canBend(CoreAbility.getAbility("EarthBurrow"))) {
-				return true;
-			}
-			
-			return false;
+
+	private boolean canBend(Player p) {
+		BendingPlayer bp = BendingPlayer.getBendingPlayer(p.getPlayer());
+
+		if (bp.canBend(CoreAbility.getAbility("EarthBurrow"))) {
+			return true;
 		}
-		
+
+		return false;
 	}
-	
+
+}

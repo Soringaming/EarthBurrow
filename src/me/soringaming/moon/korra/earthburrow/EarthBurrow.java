@@ -39,29 +39,25 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, Listener 
 	private Location start;
 
 	private boolean sunk;
-	
+
 	private long startTime;
 	private long maxSinkTime;
+
+	private boolean locSet;
 
 	private static final ConcurrentHashMap<Block, Long> TopBlock = new ConcurrentHashMap<Block, Long>();
 	private static final ConcurrentHashMap<Block, Long> CapsuleBlocks = new ConcurrentHashMap<Block, Long>();
 	private static final ConcurrentHashMap<Entity, Entity> instances = new ConcurrentHashMap<Entity, Entity>();
 
-	@SuppressWarnings("deprecation")
 	public EarthBurrow(Player player) {
 		super(player);
 		this.player = player;
 		topBlockStored = false;
-		start = player.getLocation().add(new Vector(0, 1, 0));
+		start = player.getLocation().add(new Vector(0, 2, 0));
 		sunk = false;
 		startTime = System.currentTimeMillis();
 		maxSinkTime = 5000;
-		if(!player.isOnGround()) {
-			remove();
-			return;
-		} else {
-			start();
-		}
+		start();
 	}
 
 	@Override
@@ -89,15 +85,20 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, Listener 
 		return true;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void progress() {
 		if (player.isDead() || !player.isOnline()) {
 			remove();
 			return;
 		}
-		
-		if(maxSinkTime + startTime < System.currentTimeMillis()) {
-			raisePlayer();
+
+		if (player.isSneaking() && locSet == false && !player.isOnGround()) {
+			start = player.getLocation().add(new Vector(0, 2, 0));
+			locSet = true;
+		} else if (!player.isSneaking() && locSet == false && !player.isOnGround()) {
+			remove();
+			return;
 		}
 
 		if (GeneralMethods.isSolid(player.getLocation().add(new Vector(0, -1, 0)).getBlock())
@@ -107,63 +108,72 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, Listener 
 					instances.put(e, e);
 				}
 			}
-			sinkPlayer();
+			if (sunk == false && player.isSneaking()) {
+				sinkPlayer();
+			}
+			if (!player.isSneaking() && isEarthbendable(player.getLocation().add(new Vector(0, -1, 0)).getBlock())
+					|| maxSinkTime + startTime < System.currentTimeMillis()
+							&& isEarthbendable(player.getLocation().add(new Vector(0, -1, 0)).getBlock())) {
+				raisePlayer();
+				revertCapsule(true);
+				bPlayer.addCooldown((Ability) this);
+				for (Entity e : instances.keySet()) {
+					instances.remove(e);
+				}
+				remove();
+				return;
+			}
 		}
 
 		if (!isEarthbendable(player.getLocation().add(new Vector(0, -1, 0)).getBlock())) {
-			if(!player.isSneaking() && sunk == true) {
+			if (!player.isSneaking()) {
 				raisePlayer();
+				revertCapsule(true);
+				bPlayer.addCooldown((Ability) this);
+				for (Entity e : instances.keySet()) {
+					instances.remove(e);
+				}
+				remove();
+				return;
 			}
-			revert(false);
-			sunk = true;
+			revert(true);
 		}
 
 	}
 
 	public void sinkPlayer() {
-		if (player.isSneaking() && sunk == false) {
-			Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
-			if (topBlockStored == false) {
-				ParticleEffect.BLOCK_CRACK.display(
-						(ParticleEffect.ParticleData) new ParticleEffect.BlockData(Material.DIRT, (byte) 0), 0.5F,
-						0.5F, 1F, 0.1F, 50, start, 500);
+		Block block = player.getLocation().add(new Vector(0, -1, 0)).getBlock();
+		if (topBlockStored == false) {
+			ParticleEffect.BLOCK_CRACK.display(
+					(ParticleEffect.ParticleData) new ParticleEffect.BlockData(Material.DIRT, (byte) 0), 0.5F, 0.5F, 1F,
+					0.1F, 50, start, 500);
+			player.teleport(block.getLocation());
+			player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
+			new TempBlock(block, Material.AIR, (byte) 0);
+			TopBlock.put(block, 0L);
+			topBlockStored = true;
+			depth++;
+		} else {
+			if (depth <= 3) {
+				depth++;
+				new TempBlock(block, Material.AIR, (byte) 0);
+				CapsuleBlocks.put(block, 0L);
 				player.teleport(block.getLocation());
 				player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
-				new TempBlock(block, Material.AIR, (byte) 0);
-				TopBlock.put(block, 9000L);
-				topBlockStored = true;
-				depth++;
 			} else {
-				if (depth <= 3) {
-					depth++;
-					new TempBlock(block, Material.AIR, (byte) 0);
-					CapsuleBlocks.put(block, 20000L);
-					player.teleport(block.getLocation());
-					player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
-				} else {
-					sunk = true;
-					revert(false);
-				}
+				sunk = true;
+				revert(true);
 			}
-		} else if (!player.isSneaking()){
-			sunk = true;
-			raisePlayer();
 		}
 	}
 
 	public void raisePlayer() {
-		player.teleport(player.getLocation().add(new Vector(0, depth + 1, 0)).getBlock().getLocation());
-		for (Entity e : instances.keySet()) {
-			instances.remove(e);
-		}
+		player.teleport(player.getLocation().add(new Vector(0, depth, 0)));
+		player.setVelocity(new Vector(0, 0.4, 0));
 		player.getWorld().playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
 		ParticleEffect.BLOCK_CRACK.display(
 				(ParticleEffect.ParticleData) new ParticleEffect.BlockData(Material.DIRT, (byte) 0), 0.5F, 1F, 0.5F,
 				0.1F, 50, start, 500);
-		revertCapsule(false);
-		bPlayer.addCooldown((Ability) this);
-		remove();
-		return;
 	}
 
 	public static void revert(boolean doRevert) {
@@ -188,7 +198,7 @@ public class EarthBurrow extends EarthAbility implements AddonAbility, Listener 
 
 	@Override
 	public String getDescription() {
-		return getName() + " " + getVersion() + " Developed By: \nA Test Ability ";
+		return getName() + " " + getVersion() + " Developed By " + getAuthor() + ":\nA Test Ability ";
 	}
 
 	@Override
